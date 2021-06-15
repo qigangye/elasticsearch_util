@@ -1,0 +1,4 @@
+# Created by .ignore support plugin (hsz.mobi)
+elasticsearch_demo.iml
+.idea/*
+target/

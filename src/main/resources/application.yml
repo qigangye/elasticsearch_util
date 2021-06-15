@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: elasticsearch_demo
+
+server:
+  port: 8999
+
+
+

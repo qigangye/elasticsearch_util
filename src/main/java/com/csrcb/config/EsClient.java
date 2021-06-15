@@ -18,25 +18,24 @@ import java.util.List;
  * @Created by gangye
  */
 public class EsClient {
-    public static String hosts;
+    public static String HOSTS;
 
-    public static int connectTimeout;
+    public static int CONNECTTIMEOUT;
 
-    public static int socketTimeout;
+    public static int SOCKETTIMEOUT;
 
-    public static int maxRetryTimeout;
+    public static int MAXRETRYTIMEOUT;
 
-    public static int connRequestTimeOut;
+    public static int CONNREQUESTTIMEOUT;
 
     private static RestHighLevelClient restHighLevelClient = null;
 
-    public EsClient(){
-        EsClientConfig esClientConfig = new EsClientConfig();
-        hosts = esClientConfig.getHosts();
-        connectTimeout = esClientConfig.getConnectTimeout();
-        socketTimeout = esClientConfig.getSocketTimeout();
-        maxRetryTimeout = esClientConfig.getMaxRetryTimeout();
-        connRequestTimeOut = esClientConfig.getConnRequestTimeOut();
+    public static void setConfigInfo(EsClientConfig esClientConfig) {
+        EsClient.HOSTS = esClientConfig.getHosts();
+        EsClient.CONNECTTIMEOUT = esClientConfig.getConnectTimeout();
+        EsClient.SOCKETTIMEOUT = esClientConfig.getSocketTimeout();
+        EsClient.MAXRETRYTIMEOUT = esClientConfig.getMaxRetryTimeout();
+        EsClient.CONNREQUESTTIMEOUT = esClientConfig.getConnRequestTimeOut();
     }
 
     public static RestHighLevelClient getInstance(){
@@ -49,16 +48,16 @@ public class EsClient {
     }
 
     private static RestHighLevelClient createClient(){
-        List<String> sockets = Arrays.asList(hosts.split(DefineConstant.COMMAN_SIGN));
+        List<String> sockets = Arrays.asList(HOSTS.split(DefineConstant.COMMAN_SIGN));
         List<HttpHost> httpHosts = new ArrayList<>();
         for (String socket : sockets){
             httpHosts.add(new HttpHost(socket.split(DefineConstant.COLON_SIGN)[0], Integer.valueOf(socket.split(DefineConstant.COLON_SIGN)[1]),"http"));
         }
-        RestClientBuilder builder = RestClient.builder(httpHosts.toArray(new HttpHost[0])).setMaxRetryTimeoutMillis(maxRetryTimeout);
+        RestClientBuilder builder = RestClient.builder(httpHosts.toArray(new HttpHost[0])).setMaxRetryTimeoutMillis(MAXRETRYTIMEOUT);
         builder.setRequestConfigCallback((RequestConfig.Builder requestConfigBuilder) -> {
-            requestConfigBuilder.setConnectTimeout(connectTimeout);
-            requestConfigBuilder.setConnectionRequestTimeout(connRequestTimeOut);
-            requestConfigBuilder.setSocketTimeout(socketTimeout);
+            requestConfigBuilder.setConnectTimeout(CONNECTTIMEOUT);
+            requestConfigBuilder.setConnectionRequestTimeout(CONNREQUESTTIMEOUT);
+            requestConfigBuilder.setSocketTimeout(SOCKETTIMEOUT);
             return requestConfigBuilder;
         });
 

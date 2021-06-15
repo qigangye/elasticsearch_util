@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @Classname EsClientConfig
  * @Description 获取es的相关配置属性，以及属性值
@@ -27,5 +29,11 @@ public class EsClientConfig {
 
     @Value("${elasticsearch.config.connRequestTimeOut}")
     private int connRequestTimeOut;
+
+    @PostConstruct
+    public void init(){
+        EsClient.setConfigInfo(this);
+    }
+
 
 }

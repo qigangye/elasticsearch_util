@@ -168,18 +168,18 @@ public class EsUtil {
             }else {
                 rangeQueryBuilder = QueryBuilders.rangeQuery(key);
             }
-            if (StringUtils.isEmpty(range.get("leftValue"))){
+            if (!StringUtils.isEmpty(range.get("leftValue"))){
                 if (DefineConstant.INTERVAL_OPEN_VALUE.equals(range.get("leftType"))){
                     rangeQueryBuilder.from(range.get("leftValue"),false);
                 } else if (DefineConstant.INTERVAL_CLOSE_VALUE.equals(range.get("leftType"))){
                     rangeQueryBuilder.from(range.get("leftValue"),true);
                 }
             }
-            if (StringUtils.isEmpty(range.get("rightValue"))){
+            if (!StringUtils.isEmpty(range.get("rightValue"))){
                 if (DefineConstant.INTERVAL_OPEN_VALUE.equals(range.get("rightType"))){
-                    rangeQueryBuilder.from(range.get("rightValue"),false);
+                    rangeQueryBuilder.to(range.get("rightValue"),false);
                 } else if (DefineConstant.INTERVAL_CLOSE_VALUE.equals(range.get("rightType"))){
-                    rangeQueryBuilder.from(range.get("rightValue"),true);
+                    rangeQueryBuilder.to(range.get("rightValue"),true);
                 }
             }
             boolQueryBuilder.must(rangeQueryBuilder);

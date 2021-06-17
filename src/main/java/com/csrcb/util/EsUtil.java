@@ -281,8 +281,8 @@ public class EsUtil {
      * @param needAggrFields   需要被聚合的字段(当然，这里是不同的字段，不同的聚合)
      * @return
      */
-    public static Map<String, Map<String, String>> aggregationQuery(String tableName, Map<String, Object> equalsCondition, Map<String, Object> rangeCondition, List<String> needAggrFields){
-        Map<String, Map<String, String>> resultMap = new HashMap<>();
+    public static Map<String, Object> aggregationQuery(String tableName, Map<String, Object> equalsCondition, Map<String, Object> rangeCondition, List<String> needAggrFields){
+        Map<String, Object> resultMap = new HashMap<>();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         //等值查询
@@ -328,7 +328,7 @@ public class EsUtil {
     }
 
     /**
-     * @Description           根据某一字段进行分组，然后聚合
+     * @Description           根据指定字段进行分组，然后聚合
      * @param tableName       index名
      * @param equalsCondition 等值条件
      * @param rangeCondition  范围条件
@@ -383,7 +383,7 @@ public class EsUtil {
                         .field(groupField.endsWith("_s") ? groupField + ".keyword" : groupField));
                     }
                     TermsAggregationBuilder tempAggr = null;
-                    for (int i = groupByFields.size()-1 ; i>1 ;i++){
+                    for (int i = groupByFields.size()-1 ; i>1 ;i--){
                         if (null == tempAggr){
                             tempAggr = termAggs.get(i-1).subAggregation(termAggs.get(i).subAggregation(statsAggr));
                         }else {
@@ -670,7 +670,7 @@ public class EsUtil {
                             "request: [" + ireq + "]: [" + response.getFailureMessage() + "]");
                     item.put("isSuccess", "FAIL");
                 }
-                log.info("-------bulk---batchInsert-----", item);
+                log.info("-------bulk---batchInsert------->{}", item);
                 insertResults.add(item);
             }
         } catch (IOException e) {

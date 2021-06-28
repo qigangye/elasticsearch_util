@@ -638,7 +638,7 @@ public class EsUtil {
     }
 
     /**
-     * @Description  批量向es插入数据
+     * @Description  批量向es插入数据，最好分批向es插入，而且将客户端的超时时间延长(此处我使用的单记录的操作的5秒对于批量操作就不合适了)
      * @param indexName
      * @param sourceList
      * @return
@@ -654,7 +654,8 @@ public class EsUtil {
             indexRequest.source(source);
             bulkRequest.add(indexRequest);
         }
-        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
         try {
             BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
             BulkItemResponse[] itemResponses = bulkResponse.getItems();

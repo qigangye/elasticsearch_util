@@ -646,7 +646,7 @@ public class EsUtil {
     public static Map<String, Object> batchInsert(String indexName, List<Map<String, Object>> sourceList){
         List<Map<String, Object>> insertResults = new ArrayList<>();
         Map<String, Object> result = new HashMap<>();
-        RestHighLevelClient client = EsClient.getInstance();
+        RestHighLevelClient client = EsClient.getInstance();//定义一个es连接的客户端，延长连接超时时间
         BulkRequest bulkRequest = new BulkRequest();
         for (Map<String, Object> source : sourceList){
             IndexRequest indexRequest = new IndexRequest(indexName,DefineConstant.SEARCH_REQUEST_TYPE);
@@ -656,23 +656,36 @@ public class EsUtil {
         }
         bulkRequest.timeout(TimeValue.timeValueMinutes(2));
         bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+        int succesNum = 0;//成功笔数
+        int failNum = 0;//失败笔数
         try {
             BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
-            BulkItemResponse[] itemResponses = bulkResponse.getItems();
-            for (int i = 0;i < itemResponses.length; i++){
-                BulkItemResponse response = itemResponses[i];
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", response.getId());
-                item.put("status", response.status().toString());
-                item.put("failure", response.getFailureMessage());
-                if (response.isFailed()){
-                    IndexRequest ireq = (IndexRequest) bulkRequest.requests().get(i);
-                    log.error("Failed while indexing to " + response.getIndex() + "type " +response.getType() + " " +
-                            "request: [" + ireq + "]: [" + response.getFailureMessage() + "]");
-                    item.put("isSuccess", "FAIL");
+            if (bulkResponse.hasFailures()) {
+                BulkItemResponse[] itemResponses = bulkResponse.getItems();
+                for (int i = 0;i < itemResponses.length; i++){
+                    BulkItemResponse response = itemResponses[i];
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("id", response.getId());
+                    item.put("status", response.status().toString());
+                    item.put("failure", response.getFailureMessage());
+                    if (response.isFailed()){
+                        IndexRequest ireq = (IndexRequest) bulkRequest.requests().get(i);
+                        log.error("Failed while indexing to " + response.getIndex() + "type " +response.getType() + " " +
+                                "request: [" + ireq + "]: [" + response.getFailureMessage() + "]");
+                        item.put("isSuccess", "FAIL");
+                        failNum ++;
+                    }else {
+                        succesNum ++;
+                    }
+//                    log.info("-------bulk---batchInsert------->{}", item);返回的日志不打印，不然日志过多
+                    insertResults.add(item);
                 }
-                log.info("-------bulk---batchInsert------->{}", item);
-                insertResults.add(item);
+                result.put("succesNum",succesNum);
+                result.put("failNum",failNum);
+            } else {
+                result.put("successFlag","1");
+                result.put("succesNum",sourceList.size());
+                result.put("failNum",failNum);
             }
         } catch (IOException e) {
             log.error(e.getMessage());
